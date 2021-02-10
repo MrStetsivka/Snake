@@ -11,6 +11,9 @@ let box = 32;
 
 let score = 0;
 
+let dir;
+
+
 let food = {
     x: Math.floor(Math.random() * 17 + 1) * box,
     y: Math.floor(Math.random() * 15 + 3) * box,
@@ -20,12 +23,12 @@ let snake = [];
 snake[0] = {
     x: 9 * box,
     y: 10 * box,
-}
+};
 
 
 document.addEventListener("keydown", direction);
 
-let dir;
+
 
 function direction(event) {
     if (event.keyCode == 37 && dir != "right")
@@ -38,13 +41,22 @@ function direction(event) {
         dir = "down";
 }
 
+function eatTail(head, bodySnake) {
+    for (let i = 0; i < bodySnake.length; i++) {
+        if (head.x == bodySnake[i].x && head.y == bodySnake[i].y) {
+            clearInterval(game);
+        }
+    }
+
+}
+
 function drawGame() {
     ctx.drawImage(ground, 0, 0);
 
     ctx.drawImage(foodImg, food.x, food.y);
 
     for (let i = 0; i < snake.length; i++) {
-        ctx.fillStyle = "green";
+        ctx.fillStyle = i == 0 ? "green" : "red";
         ctx.fillRect(snake[i].x, snake[i].y, box, box);
     }
 
@@ -55,7 +67,20 @@ function drawGame() {
     let snakeX = snake[0].x;
     let snakeY = snake[0].y;
 
-    snake.pop();
+    if (snakeX == food.x && snakeY == food.y) {
+        score++;
+        food = {
+            x: Math.floor(Math.random() * 17 + 1) * box,
+            y: Math.floor(Math.random() * 15 + 3) * box,
+        };
+    } else {
+        snake.pop();
+    }
+
+
+    if (snakeX <= box || snakeX >= box * 17 || snakeY <= box * 3 || snakeY >= box * 17) {
+        clearInterval(game);
+    }
 
 
     if (dir == "left") snakeX -= box;
@@ -68,9 +93,11 @@ function drawGame() {
         y: snakeY,
     };
 
+    eatTail(newHead, snake);
+
     snake.unshift(newHead);
 
 
 }
 
-let game = setInterval(drawGame, 200);
+let game = setInterval(drawGame, 150);
